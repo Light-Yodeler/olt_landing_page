@@ -16,9 +16,14 @@ class ImageOptimizerService
         int $quality = 82
     ): string {
         $extension = strtolower($file->getClientOriginalExtension());
+        $mime = $file->getMimeType();
 
-        if (in_array($extension, ['svg', 'ico'])) {
-            return $file->store($directory, 'public');
+        if (in_array($extension, ['svg', 'ico']) || in_array($mime, ['image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'])) {
+            $safeExt = $extension === 'svg' ? 'svg' : 'ico';
+            $filename = $directory . '/' . Str::random(40) . '.' . $safeExt;
+            Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+
+            return $filename;
         }
 
         $image = Image::read($file);

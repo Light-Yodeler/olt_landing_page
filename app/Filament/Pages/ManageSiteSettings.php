@@ -68,6 +68,7 @@ class ManageSiteSettings extends Page implements HasForms
                                     ->saveUploadedFileUsing(fn (UploadedFile $file) => ImageOptimizerService::optimizeAndStore($file, 'site', 800)),
                                 FileUpload::make('favicon_path')
                                     ->label('Favicon (.ico, .png, .svg)')
+                                    ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml'])
                                     ->disk('public')
                                     ->directory('site')
                                     ->maxSize(5120)
