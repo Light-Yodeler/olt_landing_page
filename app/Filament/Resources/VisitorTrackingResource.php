@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\VisitorTrackingResource\Pages;
+use App\Filament\Resources\VisitorTrackingResource\Widgets\MonthlyVisitorsChart;
+use App\Filament\Resources\VisitorTrackingResource\Widgets\VisitorStatsOverview;
 use App\Models\VisitorTracking;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -145,13 +147,13 @@ class VisitorTrackingResource extends Resource
 
                 Tables\Columns\TextColumn::make('first_visited_at')
                     ->label('First Seen')
-                    ->dateTime('H:i:s')
+                    ->dateTime('d M Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('last_visited_at')
                     ->label('Last Seen')
-                    ->dateTime('H:i:s')
+                    ->dateTime('d M Y, H:i:s')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('user_agent')
@@ -206,6 +208,14 @@ class VisitorTrackingResource extends Resource
     {
         return [
             'index' => Pages\ListVisitorTrackings::route('/'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            VisitorStatsOverview::class,
+            MonthlyVisitorsChart::class,
         ];
     }
 }
