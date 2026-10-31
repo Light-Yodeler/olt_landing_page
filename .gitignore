@@ -40,3 +40,5 @@ database/*.sqlite-journal
 database/*.sqlite-shm
 database/*.sqlite-wal
 /README/
+/.agents/
+TEST_READY.md

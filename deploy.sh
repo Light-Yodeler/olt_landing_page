@@ -30,6 +30,7 @@ rsync -avz --delete \
     --exclude='.phpunit.result.cache' \
     --exclude='database/database.sqlite' \
     --exclude='bootstrap/cache/*.php' \
+    --exclude='public/storage' \
     --exclude='storage/logs/*.log' \
     --exclude='storage/framework/cache/data/*' \
     --exclude='storage/framework/views/*' \
@@ -40,6 +41,10 @@ echo -e "${YELLOW}[4/4] Menjalankan migrasi, perizinan, dan refresh cache di VPS
 ssh "$REMOTE_HOST" "bash -s" << 'EOF'
 set -e
 cd /var/www/ocean-lombok-tour
+
+# Pastikan symbolic link storage mengarah ke path Linux VPS
+rm -f public/storage
+php artisan storage:link --quiet || true
 
 # Bersihkan bootstrap cache lama agar package discover selalu akurat
 rm -f bootstrap/cache/*.php
