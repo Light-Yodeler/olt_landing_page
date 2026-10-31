@@ -121,9 +121,11 @@ class VisitorTrackingResource extends Resource
                     ->label('IP Address')
                     ->fontFamily('mono')
                     ->copyable()
+                    ->copyableState(fn (VisitorTracking $record): string => $record->masked_ip ?? 'Hidden')
                     ->copyMessage('IP address copied to clipboard')
                     ->searchable()
                     ->sortable()
+                    ->formatStateUsing(fn (VisitorTracking $record): string => $record->masked_ip ?? 'Hidden')
                     ->placeholder(fn (VisitorTracking $record): string => $record->masked_ip ?? 'Hidden'),
 
                 Tables\Columns\TextColumn::make('visit_count')
@@ -175,11 +177,11 @@ class VisitorTrackingResource extends Resource
                         return $query
                             ->when(
                                 $data['date_from'],
-                                fn (Builder $q, $date): Builder => $q->whereDate('visit_date', '>=', $date),
+                                fn (Builder $q, $date): Builder => $q->where('visit_date', '>=', $date),
                             )
                             ->when(
                                 $data['date_until'],
-                                fn (Builder $q, $date): Builder => $q->whereDate('visit_date', '<=', $date),
+                                fn (Builder $q, $date): Builder => $q->where('visit_date', '<=', $date),
                             );
                     }),
 

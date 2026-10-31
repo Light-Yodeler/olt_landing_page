@@ -100,6 +100,7 @@ class LoginHistoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('user'))
             ->columns([
                 Tables\Columns\TextColumn::make('attempted_identifier')
                     ->label('User / Identifier')
@@ -179,6 +180,11 @@ class LoginHistoryResource extends Resource
             ->emptyStateHeading('No login history records found')
             ->emptyStateDescription('Authentication attempts will appear here automatically when users attempt to log in.')
             ->emptyStateIcon('heroicon-o-shield-check');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('user');
     }
 
     public static function getPages(): array

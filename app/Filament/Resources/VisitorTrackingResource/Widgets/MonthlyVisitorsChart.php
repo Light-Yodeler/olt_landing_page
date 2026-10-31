@@ -8,11 +8,27 @@ use Filament\Widgets\ChartWidget;
 
 class MonthlyVisitorsChart extends ChartWidget
 {
-    protected static ?string $heading = 'Grafik Kunjungan 30 Hari Terakhir';
+    protected static ?string $heading = 'Monthly Visitors Trend (Last 30 Days)';
 
     protected static ?string $maxHeight = '280px';
 
     protected int | string | array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->isSuperAdmin() ?? false;
+    }
+
+    public function boot(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+        parent::mount();
+    }
 
     protected function getData(): array
     {
@@ -21,7 +37,6 @@ class MonthlyVisitorsChart extends ChartWidget
         $hitsData = [];
         $uniqueData = [];
 
-        // Pre-fill last 30 days
         for ($i = 29; $i >= 0; $i--) {
             $carbonDate = Carbon::today()->subDays($i);
             $dateString = $carbonDate->toDateString();
@@ -34,15 +49,18 @@ class MonthlyVisitorsChart extends ChartWidget
 
         $thirtyDaysAgo = Carbon::today()->subDays(29)->toDateString();
 
-        $records = VisitorTracking::whereDate('visit_date', '>=', $thirtyDaysAgo)
-            ->selectRaw('visit_date, sum(visit_count) as total_hits, count(*) as unique_visitors')
+        $records = VisitorTracking::query()
+            ->toBase()
+            ->where('visit_date', '>=', $thirtyDaysAgo)
             ->groupBy('visit_date')
+            ->orderBy('visit_date', 'asc')
+            ->selectRaw('visit_date, sum(visit_count) as total_hits, count(*) as unique_visitors')
             ->get();
 
         foreach ($records as $record) {
             $dateKey = is_string($record->visit_date)
                 ? substr($record->visit_date, 0, 10)
-                : $record->visit_date->toDateString();
+                : Carbon::parse($record->visit_date)->toDateString();
 
             if (isset($dates[$dateKey])) {
                 $dates[$dateKey]['hits'] = (int) $record->total_hits;
@@ -59,17 +77,17 @@ class MonthlyVisitorsChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Kunjungan (Hits)',
+                    'label' => 'Total Visits (Hits)',
                     'data' => $hitsData,
-                    'borderColor' => '#0ea5e9', // Ocean-500
+                    'borderColor' => '#0ea5e9',
                     'backgroundColor' => 'rgba(14, 165, 233, 0.15)',
                     'fill' => true,
                     'tension' => 0.3,
                 ],
                 [
-                    'label' => 'Pengunjung Unik',
+                    'label' => 'Unique Visitors',
                     'data' => $uniqueData,
-                    'borderColor' => '#f59e0b', // AmberGlow-500
+                    'borderColor' => '#f59e0b',
                     'backgroundColor' => 'rgba(245, 158, 11, 0.1)',
                     'fill' => false,
                     'tension' => 0.3,
