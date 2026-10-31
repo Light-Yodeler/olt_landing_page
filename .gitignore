@@ -42,3 +42,9 @@ database/*.sqlite-wal
 /README/
 /.agents/
 TEST_READY.md
+
+# Skrip deployment lokal (mengekspos path server dan konfigurasi VPS)
+deploy.sh
+
+# Dokumen audit dan roadmap internal (arsitektur keamanan, detail teknis)
+PROJECT.md
