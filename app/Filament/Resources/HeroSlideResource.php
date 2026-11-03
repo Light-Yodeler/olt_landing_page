@@ -33,6 +33,7 @@ class HeroSlideResource extends Resource
             FileUpload::make('image_path')
                 ->label('Slide Image')
                 ->image()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                 ->disk('public')
                 ->directory('hero-slides')
                 ->required()

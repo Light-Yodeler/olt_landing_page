@@ -34,6 +34,7 @@ class DestinationResource extends Resource
             FileUpload::make('image_path')
                 ->label('Destination Image')
                 ->image()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                 ->disk('public')
                 ->directory('destinations')
                 ->required()

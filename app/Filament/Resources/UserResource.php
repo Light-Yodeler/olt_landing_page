@@ -114,7 +114,11 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->using(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                            $records->filter(fn (User $record): bool => $record->id !== auth()->id())
+                                ->each(fn (User $record): ?bool => $record->delete());
+                        }),
                 ]),
             ]);
     }

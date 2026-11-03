@@ -62,6 +62,7 @@ class ManageSiteSettings extends Page implements HasForms
                                 FileUpload::make('logo_path')
                                     ->label('Company Logo')
                                     ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->disk('public')
                                     ->directory('site')
                                     ->maxSize(15360)

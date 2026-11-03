@@ -48,3 +48,14 @@ deploy.sh
 
 # Dokumen audit dan roadmap internal (arsitektur keamanan, detail teknis)
 PROJECT.md
+
+# Berkas laporan audit keamanan
+REPORT.md
+FINDINGS-DETAIL.md
+NEEDS-VALIDATION.md
+coverage-ledger.json
+findings.json
+run-metadata.json
+architecture.md
+/audit/
+/security-audit/

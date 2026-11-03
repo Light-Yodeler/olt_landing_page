@@ -588,4 +588,49 @@ class AdminPanelSecurityTest extends TestCase
         $this->assertFalse(VisitorTrackingResource::canRestore($dummyRecord));
         $this->assertFalse(VisitorTrackingResource::canRestoreAny());
     }
+
+    public function test_user_resource_bulk_delete_prevents_authenticated_superadmin_self_deletion(): void
+    {
+        $superAdmin = $this->createUserWithRole(User::ROLE_SUPERADMIN, 'super_bulk_guard');
+        $otherUser = $this->createUserWithRole(User::ROLE_STAFF, 'staff_bulk_target');
+
+        $this->actingAs($superAdmin);
+
+        \Livewire\Livewire::test(\App\Filament\Resources\UserResource\Pages\ListUsers::class)
+            ->callTableBulkAction('delete', [$superAdmin, $otherUser]);
+
+        // Superadmin must survive the bulk delete attempt
+        $this->assertNotNull($superAdmin->fresh(), 'Authenticated superadmin must not be deleted by bulk action.');
+        // Other selected user should be deleted
+        $this->assertNull($otherUser->fresh(), 'Other selected non-self user should be deleted.');
+    }
+
+    public function test_image_optimizer_service_sanitizes_svg_content(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $svgPayload = '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(document.domain)</script><circle cx="50" cy="50" r="40"/><a href="javascript:alert(2)">Link</a></svg>';
+        $tempPath = tempnam(sys_get_temp_dir(), 'svg_test');
+        file_put_contents($tempPath, $svgPayload);
+
+        $uploadedFile = new \Illuminate\Http\UploadedFile(
+            $tempPath,
+            'malicious.svg',
+            'image/svg+xml',
+            null,
+            true
+        );
+
+        $storedPath = \App\Services\ImageOptimizerService::optimizeAndStore($uploadedFile, 'site');
+
+        $savedContent = \Illuminate\Support\Facades\Storage::disk('public')->get($storedPath);
+
+        $this->assertStringNotContainsString('<script', $savedContent);
+        $this->assertStringNotContainsString('alert(document.domain)', $savedContent);
+        $this->assertStringNotContainsString('onload=', $savedContent);
+        $this->assertStringNotContainsString('javascript:', $savedContent);
+        $this->assertStringContainsString('<circle', $savedContent);
+
+        @unlink($tempPath);
+    }
 }
